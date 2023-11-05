@@ -1,40 +1,98 @@
-const operador1 = document.getElementById("operador1")
-const operador = document.getElementById("operador")
-const operador2 = document.getElementById("operador2")
-const btnCalcular = document.getElementById("calcular")
-const resultado = document.getElementById("resultado")
+class Calculator{
+    constructor(operand1Element, operand2Element){
+        this.operand1Element = operand1Element;
+        this.operand2Element = operand2Element;
+        this.clear();
+    }
 
-btnCalcular.addEventListener("click", calcular)
-function calcular(){
-    let operacion = operador.value
-    let x = parseFloat(operador1.value)
-    let y = parseFloat(operador2.value)
-    let respuesta
+    clear(){
+        this.operand1=0;
+        this.operand2=0;
+        this.operator='';
+        this.updateUI();
+    }
 
-    if((operacion === "+" ||
-    operacion === "-" ||
-    operacion === "/" ||
-    operacion === "*") &&
-    !isNaN(x) &&
-    !isNaN(y)){
-        switch (operacion) {
-            case "+":
-                respuesta = x + y
-                break;
-            case "-":
-                respuesta = x - y
-                break;
-            case "/":
-                respuesta = x / y
-                break;
-            case "*":
-                respuesta = x * y
-                break
+    updateUI(){
+        this.operand1Element.innerHTML = this.operand1 + this.operator;
+        this.operand2Element.innerHTML = this.operand2;
+    }
+
+    appendNumber(number){
+        if(number === "." && this.operand2.includes('.')) return;
+        this.operand2 = this.operand2===0? number : this.operand2.toString() + number;
+        this.updateUI();
+    }
+
+    delete(){
+        if(this.operand2 === 0) return;
+        this.operand2 = +this.operand2.toString().slice(0, -1);
+        this.updateUI();
+    }
+
+    operation(operator){
+        if(this.operator){
+            this.calc();
         }
-        resultado.style="color: black;"
-        resultado.innerText = "resultado= " +respuesta
-    } else{
-        resultado.style="color: red;"
-        resultado.innerText="No es posible hacer el calculo, operador no identificado"
+        this.operator = operator;
+        this.operand1 = +this.operand2 === 0? this.operand1 : this.operand2;
+        this.operand2 = 0;
+        this.updateUI();
+    }
+
+    calc(){
+        switch (this.operator) {
+            case "+":
+                this.operand1 = +this.operand1 + +this.operand2;
+                break;
+
+            case "-":
+                this.operand1 = +this.operand1 - +this.operand2;
+                break;
+
+            case "*":
+                this.operand1 = +this.operand1 * +this.operand2;
+                break;
+
+            case "/":
+                this.operand1 = +this.operand1 / +this.operand2;
+                break;
+        }
+        this.operator= "";
+        this.operand2 =0;
+        this.updateUI();
     }
 }
+
+const operand1Element = document.querySelector("[data-operand-1]");
+const operand2Element = document.querySelector("[data-operand-2]");
+const clearButton = document.querySelector("[data-clear]");
+const numberButtons = document.querySelectorAll("[data-number]");
+const deleteButton = document.querySelector("[data-delete]");
+const operatorButtons = document.querySelectorAll("[data-operation]");
+const equalButton = document.querySelector("[data-equals]")
+
+const calculator = new Calculator(operand1Element, operand2Element);
+
+clearButton.addEventListener("click", () => {
+    calculator.clear();
+})
+
+numberButtons.forEach(button =>{
+    button.addEventListener('click', () => {
+        calculator.appendNumber(button.innerHTML);
+    })
+})
+
+deleteButton.addEventListener('click', ()=>{
+    calculator.delete();
+})
+
+operatorButtons.forEach(button =>{
+    button.addEventListener('click', ()=>{
+        calculator.operation(button.innerHTML);
+    });
+})
+
+equalButton.addEventListener("click", ()=>{
+    calculator.calc();
+})
